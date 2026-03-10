@@ -3,8 +3,8 @@ import pandas as pd
 import joblib
 
 
-logistic_model = joblib.load("logistic_model.pkl")
-rf_model = joblib.load("rf_model.pkl")
+logistic_model = joblib.load("models/logistic_model.pkl")
+rf_model = joblib.load("models/rf_model.pkl")
 
 st.title("Customer Churn Prediction App")
 
