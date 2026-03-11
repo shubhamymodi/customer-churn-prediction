@@ -1,11 +1,11 @@
 import streamlit as st
 import pandas as pd
-import joblib
 import matplotlib.pyplot as plt
+from joblib import load
 
 
-logistic_model = joblib.load("models/logistic_model.pkl")
-rf_model = joblib.load("models/rf_model.pkl")
+logistic_model = load("models/logistic_model.pkl")
+rf_model = load("models/rf_model.pkl")
 
 tab1, tab2 = st.tabs(["Prediction", "Model Insights"])
 
