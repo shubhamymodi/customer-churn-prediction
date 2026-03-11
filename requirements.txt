@@ -3,4 +3,4 @@ pandas
 numpy
 scikit-learn==1.6.1
 joblib
-matplotlib
+matplotlib==3.8.4
