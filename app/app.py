@@ -1,13 +1,17 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from joblib import load
-
+import shap
 
 logistic_model = load("models/logistic_model.pkl")
 rf_model = load("models/rf_model.pkl")
+xgb_model = load("models/xgb_model.pkl")
 
 tab1, tab2 = st.tabs(["Prediction", "Model Insights"])
+preprocessor = rf_model.named_steps["preprocessor"]
+rf_classifier = rf_model.named_steps["model"]
 
 with tab1:
 
@@ -18,7 +22,7 @@ with tab1:
 
     model_choice = st.selectbox(
         "Choose Model",
-        ["Logistic Regression", "Random Forest"]
+        ["Logistic Regression", "Random Forest", "XGBoost"]
     )
 
 
@@ -76,12 +80,21 @@ with tab1:
     "TotalCharges":[total]
     })
 
+    X_transformed = preprocessor.transform(data)
+    feature_names = preprocessor.get_feature_names_out()
+    X_transformed_df = pd.DataFrame(
+        X_transformed,
+        columns=feature_names
+    )
+    explainer = shap.TreeExplainer(rf_classifier)
+
 
     if model_choice == "Logistic Regression":
         model = logistic_model
-    else:
+    elif model_choice == "Random Forest":
         model = rf_model
-
+    else:
+        model = xgb_model
 
     if st.button("Predict Churn"):
 
@@ -96,6 +109,21 @@ with tab1:
             st.warning("Medium Risk Customer")
         else:
             st.success("Low Risk Customer")
+        st.write(f"Model Used: **{model_choice}**")
+        st.subheader("Prediction Explanation (SHAP)")
+
+        X_transformed = preprocessor.transform(data)
+
+        explainer = shap.Explainer(rf_classifier)
+        shap_values = explainer(X_transformed_df)
+
+        fig = plt.figure()
+
+        shap.plots.waterfall(
+            shap_values[0, :, 1],
+            show=False
+        )
+        st.pyplot(fig)
 
 with tab2:
     preprocessor = rf_model.named_steps["preprocessor"]
@@ -116,13 +144,49 @@ with tab2:
     ax.set_title("Top Drivers of Customer Churn")
     st.pyplot(fig)
 
+    st.subheader("SHAP Summary Plot")
+
+    sample_data = pd.concat([data]*50, ignore_index=True)
+
+    sample_data["tenure"] = np.random.randint(0, 72, size=50)
+    sample_data["MonthlyCharges"] = np.random.uniform(20, 120, size=50)
+    sample_data["TotalCharges"] = np.random.uniform(100, 5000, size=50)
+
+    X_sample_transformed = preprocessor.transform(sample_data)
+    feature_names = preprocessor.get_feature_names_out()
+
+    X_sample_df = pd.DataFrame(
+        X_sample_transformed,
+        columns=feature_names
+    )
+    explainer = shap.Explainer(rf_classifier)
+    shap_values = explainer(X_sample_df)
+
+    fig = plt.figure()
+    shap.plots.beeswarm(
+        shap_values[:, :, 1],
+        max_display=15,
+        show=False
+    )
+    st.pyplot(fig)
+
+    st.subheader("SHAP Feature Importance")
+
+    fig = plt.figure()
+    shap.plots.bar(
+        shap_values[:, :, 1],
+        max_display=15,
+        show=False
+    )
+    st.pyplot(fig)
+
     performance_df = pd.DataFrame({
-        "Model": ["Logistic Regression", "Random Forest"],
-        "ROC AUC": [0.86, 0.85],
-        "F1 Score": [0.64, 0.65],
-        "Precision": [0.52, 0.56],
-        "Recall": [0.84, 0.78]
-    })
+    "Model": ["Logistic Regression", "Random Forest", "XGBoost"],
+    "ROC AUC": [0.86, 0.85, 0.85],
+    "F1 Score": [0.64, 0.65, 0.63],
+    "Precision": [0.52, 0.56, 0.55],
+    "Recall": [0.84, 0.78, 0.75]
+})
 
     st.subheader("Model Performance")
     st.dataframe(performance_df)
