@@ -5,3 +5,5 @@ scikit-learn==1.7.2
 joblib
 matplotlib
 scipy
+shap
+xgboost
