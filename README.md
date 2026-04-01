@@ -2,27 +2,37 @@
 
 ## 📌 Project Overview
 
-Customer churn is a critical problem for subscription-based businesses. Retaining existing customers is significantly more cost-effective than acquiring new ones.
+Customer churn is a critical problem for subscription-based businesses, as retaining existing customers is significantly more cost-effective than acquiring new ones.
 
-This project builds a **Machine Learning system to predict customer churn probability** using customer demographic, service usage, and billing data.
+This project builds an **end-to-end Machine Learning system** to predict customer churn probability using customer demographics, service usage, and billing data.
 
-The solution includes:
+The solution goes beyond just modeling and focuses on the **complete ML lifecycle**, including:
 
 - Exploratory Data Analysis (EDA)
 - Feature engineering & preprocessing
 - Model training and comparison
-- Performance evaluation
-- Model deployment with Streamlit
+- Class imbalance handling
+- Threshold optimization
+- Model explainability using SHAP
+- Deployment with Streamlit
 
-Users can input customer information and receive a **real-time churn probability prediction**.
+Users can input customer information and receive a **real-time churn probability prediction along with model insights**.
+
+---
+
+## 🎥 Live Project Walkthrough
+
+👉 https://www.youtube.com/watch?v=RKXDvzcKWL0
 
 ---
 
 ## 🚀 Live Demo
 
-Streamlit App:  https://customer-churn-prediction-lr-rf.streamlit.app/
+Streamlit App:  
+https://customer-churn-prediction-lr-rf.streamlit.app/
 
 ---
+
 ## 📊 Dataset
 
 This project uses the **Telco Customer Churn Dataset** available on Kaggle.
@@ -30,23 +40,28 @@ This project uses the **Telco Customer Churn Dataset** available on Kaggle.
 Dataset Link:  
 https://www.kaggle.com/datasets/blastchar/telco-customer-churn
 
-The dataset contains **7043 customer records with 21 features**, including:
+- **7043 customer records**
+- **21 features**
+
+### Feature Categories:
 
 - Customer demographics (gender, partner, dependents, senior citizen)
 - Account information (tenure, contract type, billing method)
 - Services subscribed (internet, streaming, security, tech support)
 - Billing information (monthly charges, total charges)
-- Target variable **Churn** indicating whether the customer left the service
+- Target variable: **Churn**
 
-Each row represents a customer and each column describes attributes related to their telecom service usage and account details. The goal is to analyze this data and build machine learning models to **predict whether a customer is likely to churn**, helping businesses design targeted retention strategies.
+The goal is to build models that **predict customer churn probability** and enable data-driven retention strategies.
 
 ---
+
 ## 🛠 Tech Stack
 
 - Python
-- Pandas
-- NumPy
+- Pandas, NumPy
 - Scikit-learn
+- XGBoost
+- SHAP
 - Matplotlib
 - Streamlit
 - Joblib
@@ -55,18 +70,19 @@ Each row represents a customer and each column describes attributes related to t
 
 ## ⚙️ Machine Learning Pipeline
 
-### Numerical Features
+### 🔹 Numerical Features
 
-- Tenure
-- MonthlyCharges
-- TotalCharges
+- Tenure  
+- MonthlyCharges  
+- TotalCharges  
 
-Processing steps:
-
+Processing:
 - Missing value imputation
 - Standard scaling
 
-### Categorical Features
+---
+
+### 🔹 Categorical Features
 
 - Gender
 - Contract type
@@ -74,61 +90,97 @@ Processing steps:
 - Payment method
 - Service-related features
 
-Processing steps:
-
+Processing:
 - Missing value imputation
 - One-hot encoding
 
-The preprocessing pipeline is implemented using **Scikit-learn ColumnTransformer**.
+---
+
+All preprocessing is handled using a **Scikit-learn ColumnTransformer**, ensuring a clean and reproducible pipeline.
 
 ---
 
 ## 🤖 Models Used
 
-### Logistic Regression
+### 🔹 Logistic Regression
+- Baseline interpretable model  
+- High recall → good at identifying churn customers  
 
-- Baseline interpretable model
-- Higher recall for identifying churn customers
+---
 
-### Random Forest
+### 🔹 Random Forest
+- Ensemble model  
+- Captures non-linear relationships  
+- Balanced performance across metrics  
 
-- Ensemble learning model
-- Captures non-linear relationships
-- Slightly stronger balanced performance
+---
+
+### 🔹 XGBoost
+- Gradient boosting model  
+- Handles class imbalance using `scale_pos_weight`  
+- Strong performance with optimized learning and regularization  
 
 ---
 
 ## 📈 Model Performance
 
 | Model | ROC-AUC | F1 Score | Precision | Recall |
-|------|------|------|------|------|
+|------|--------|--------|--------|--------|
 | Logistic Regression | 0.86 | 0.64 | 0.52 | 0.84 |
 | Random Forest | 0.85 | 0.65 | 0.56 | 0.78 |
+| XGBoost | 0.85 | 0.63 | 0.55 | 0.75 |
 
 ---
 
-## 🔍 Key Insights
+## ⚖️ Threshold Optimization
 
-### Contract Type
-Customers on **month-to-month contracts** have the highest churn probability.
+Instead of using a default threshold (0.5), different thresholds were evaluated to balance:
 
-### Customer Tenure
+- Precision (avoiding false positives)
+- Recall (capturing churn customers)
+
+This allows businesses to **customize risk tolerance based on strategy**.
+
+---
+
+## 🔍 Model Explainability (SHAP)
+
+To make the model interpretable, **SHAP (SHapley Additive Explanations)** was used:
+
+- Explains **individual predictions**
+- Identifies **global feature importance**
+- Helps understand **why a customer is likely to churn**
+
+### Key Insights from SHAP:
+
+- 📉 Low tenure → higher churn risk  
+- 📉 Month-to-month contracts → strong churn driver  
+- 📈 Higher monthly charges → increased churn probability  
+- ❌ Lack of services (security, tech support) → higher churn  
+
+---
+
+## 📊 Key Insights
+
+### 📌 Contract Type
+Customers on **month-to-month contracts** show the highest churn probability.
+
+### 📌 Customer Tenure
 Customers with shorter tenure are significantly more likely to churn.
 
-### Monthly Charges
-Higher monthly charges increase churn likelihood.
+### 📌 Monthly Charges
+Higher monthly charges correlate with increased churn.
 
-### Internet Service Type
-Customers with **fiber optic internet service** show higher churn rates.
+### 📌 Internet Service Type
+Customers with **fiber optic service** have higher churn rates.
 
-### Lack of Value-added Services
-Customers without services like:
+### 📌 Value-added Services
+Customers without:
+- Online Security  
+- Tech Support  
+- Device Protection  
 
-- Online Security
-- Tech Support
-- Device Protection
-
-are more likely to leave.
+are more likely to churn.
 
 ---
 
@@ -136,8 +188,30 @@ are more likely to leave.
 
 Based on the model insights:
 
-- Encourage **long-term contracts** through discounts or loyalty programs
-- Offer **bundled services (security, tech support)** to increase retention
-- Provide **retention offers to high-charge customers**
-- Focus retention strategies on **new customers with low tenure**
+- Encourage **long-term contracts** via incentives  
+- Offer **bundled services** to improve retention  
+- Provide **targeted offers to high-paying customers**  
+- Focus retention strategies on **new customers with low tenure**  
 
+---
+
+## 🌐 Deployment
+
+The model is deployed using **Streamlit**, allowing users to:
+
+- Input customer data  
+- Get churn probability instantly  
+- View model explanations using SHAP  
+
+---
+
+## 📌 Conclusion
+
+This project demonstrates how to build a **production-ready ML solution** that combines:
+
+- Predictive modeling  
+- Business understanding  
+- Explainability  
+- Deployment  
+
+It highlights the importance of going beyond modeling to deliver **actionable business insights**.
